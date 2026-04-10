@@ -1,17 +1,21 @@
 # Design Decisions
 
-## 1. Backend Framework: Express.js instead of FastAPI
-- **Reason:** The current environment is optimized for Node.js. To ensure stability and port 3000 accessibility, Express.js is used.
-- **Impact:** API contracts remain identical to the requested FastAPI structure.
+## 1. Event-Driven Architecture
+- **Decision:** Use a message bus for inter-agent communication.
+- **Reason:** Allows agents to run in parallel, scale independently, and ensures the system is non-blocking.
 
-## 2. ML Implementation: Simulated/Mocked
-- **Reason:** Real-time GIS processing (Rasterio/GeoPandas) requires specific system dependencies and heavy compute.
-- **Impact:** We will simulate realistic NDVI and change detection outputs to focus on the "Intelligence OS" experience and Gemini reasoning.
+## 2. Backend Implementation: Node.js/Express
+- **Decision:** Implement the "FastAPI" logic using Node.js.
+- **Reason:** Optimized for the current sandboxed environment while maintaining identical API contracts.
 
-## 3. Map Engine: React Leaflet
-- **Reason:** Industry standard for React-based GIS applications.
-- **Impact:** Allows for easy overlay of GeoJSON and disturbance masks.
+## 3. State Management: In-Memory + SQLite
+- **Decision:** Use an in-memory event emitter for the bus and SQLite for temporal memory.
+- **Reason:** Low latency for a hackathon MVP, persistent enough for temporal analysis.
 
-## 4. UI Aesthetic: Technical Dashboard (Recipe 1)
-- **Reason:** Fits the "Mission Control" vibe of a geospatial intelligence platform.
-- **Impact:** Uses visible grids, monospace fonts, and high-contrast dark theme.
+## 4. ML Mocking Strategy
+- **Decision:** Mock Prithvi-EO-2.0 and STAC API outputs.
+- **Reason:** Avoids external dependency bottlenecks and quota issues while demonstrating the full pipeline logic.
+
+## 5. UI: Map-First Dashboard
+- **Decision:** Fullscreen Leaflet map with real-time agent overlays.
+- **Reason:** Provides immediate visual impact and clearly demonstrates the "Swarm" behavior.

@@ -1,15 +1,22 @@
 # Dataset Notes
 
-## Sentinel-2
-- **Bands:** B04 (Red), B08 (NIR) for NDVI.
-- **Resolution:** 10m.
-- **Frequency:** 5 days.
+## Sentinel-2 Bands
+- **B04 (Red):** 665nm
+- **B08 (NIR):** 842nm
+- **B11 (SWIR):** 1610nm (for Bare Soil Index)
 
-## Disturbance Indicators
-- **Bare Soil:** High reflectance in SWIR, low in NIR.
-- **Water Turbidity:** Increased sediment in nearby rivers.
-- **Road Networks:** Linear clearings in dense forest.
+## Mock Data Format
+```json
+{
+  "ndvi": 0.45,
+  "nbr": -0.12,
+  "bsi": 0.35,
+  "anomaly_score": 0.78,
+  "timestamp": "2026-04-10T15:00:00Z"
+}
+```
 
-## Mock Logic
-- If `lat` is in a known mining region (e.g., Amazon Basin, Ghana), return high disturbance.
-- Randomize `ndvi_delta` between 0.2 and 0.6 for "detected" areas.
+## Feature Classification (VisionAgent Mock)
+- `bare_soil`: High confidence (0.92)
+- `tailings_pond`: Medium confidence (0.65)
+- `road_cut`: High confidence (0.88)

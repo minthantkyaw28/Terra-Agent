@@ -1,5 +1,5 @@
 {
-  "name": "TerraAgent: Earth Intelligence OS",
-  "description": "Illegal Mining Sentinel using GIS, Remote Sensing, and Gemini reasoning.",
+  "name": "TerraSentinel: Swarm OS",
+  "description": "Autonomous Earth Intelligence Swarm for illegal mining detection using satellite imagery, GIS analysis, and Gemini 2.5 Pro reasoning.",
   "requestFramePermissions": []
 }
