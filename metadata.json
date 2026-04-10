@@ -1,0 +1,5 @@
+{
+  "name": "TerraAgent: Earth Intelligence OS",
+  "description": "Illegal Mining Sentinel using GIS, Remote Sensing, and Gemini reasoning.",
+  "requestFramePermissions": []
+}
