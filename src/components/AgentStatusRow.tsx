@@ -36,20 +36,15 @@ export const AgentStatusRow: React.FC<AgentStatusRowProps> = ({ name, status, ta
   };
 
   return (
-    <div className="flex items-center justify-between bg-white/5 p-2 rounded-lg border border-white/5 transition-all duration-300">
+    <div className="flex items-center justify-between bg-white/5 p-1.5 rounded-lg border border-white/5 transition-all duration-300">
       <div className="flex items-center gap-2">
-        <div className={cn("w-2 h-2 rounded-full transition-all duration-500", getDotColor(status))} />
-        <span className="text-xs font-medium text-gray-300 capitalize">{name.replace('_', ' ')}</span>
+        <div className={cn("w-1.5 h-1.5 rounded-full transition-all duration-500", getDotColor(status))} />
+        <span className="text-[10px] font-medium text-gray-300 capitalize">{name.replace('_', ' ')}</span>
       </div>
       <div className="flex flex-col items-end">
         <span className={cn("status-badge transition-all duration-300", getStatusClass(status))}>
           {status}
         </span>
-        {task && (
-          <span className="text-[8px] text-gray-500 mt-0.5 font-mono uppercase tracking-tighter truncate max-w-[80px]">
-            {task}
-          </span>
-        )}
       </div>
     </div>
   );

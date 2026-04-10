@@ -33,7 +33,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({ finding, onClick, sele
       whileHover={{ scale: 1.02 }}
       onClick={() => onClick(finding)}
       className={cn(
-        "group cursor-pointer p-4 rounded-xl border transition-all duration-300 relative overflow-hidden",
+        "group cursor-pointer p-3 rounded-xl border transition-all duration-300 relative overflow-hidden",
         selected 
           ? "bg-brand-primary/10 border-brand-primary/50 shadow-[0_0_20px_rgba(0,242,255,0.15)]" 
           : "bg-white/5 border-white/5 hover:border-white/20"
@@ -47,52 +47,52 @@ export const FindingCard: React.FC<FindingCardProps> = ({ finding, onClick, sele
         className={cn("absolute top-0 left-0 w-1 transition-all duration-1000", getSeverityColor(finding.severity))}
       />
 
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start mb-2">
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-lg">{finding.flag}</span>
-            <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">{finding.region}</span>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-base">{finding.flag}</span>
+            <span className="text-[9px] font-mono text-gray-400 uppercase tracking-widest">{finding.region}</span>
           </div>
-          <h3 className="text-sm font-bold text-gray-100 leading-tight">{finding.miningType}</h3>
+          <h3 className="text-xs font-bold text-gray-100 leading-tight">{finding.miningType}</h3>
         </div>
         <div className={cn(
-          "px-2 py-1 rounded text-[10px] font-black border uppercase tracking-tighter",
+          "px-1.5 py-0.5 rounded text-[8px] font-black border uppercase tracking-tighter",
           getSeverityTextClass(finding.severity)
         )}>
           {finding.severity >= 10 ? 'CRITICAL' : 'CONFIRMED'}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-mono">
-          <MapPin className="w-3 h-3" />
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="flex items-center gap-1 text-[9px] text-gray-500 font-mono">
+          <MapPin className="w-2.5 h-2.5" />
           <span>{finding.coords[0].toFixed(1)}°, {finding.coords[1].toFixed(1)}°</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-mono justify-end">
-          <Activity className="w-3 h-3" />
+        <div className="flex items-center gap-1 text-[9px] text-gray-500 font-mono justify-end">
+          <Activity className="w-2.5 h-2.5" />
           <span>Δ NDVI: {finding.ndviDelta.toFixed(2)}</span>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-4">
+      <div className="flex flex-wrap gap-1 mb-3">
         {finding.features.slice(0, 2).map((feature) => (
           <span 
             key={feature} 
-            className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-mono text-gray-400 uppercase"
+            className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[8px] font-mono text-gray-400 uppercase"
           >
             {feature.replace('_', ' ')}
           </span>
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/5">
-        <div className="flex items-center gap-1 text-[10px] font-bold text-brand-primary/80">
+      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+        <div className="flex items-center gap-1 text-[9px] font-bold text-brand-primary/80">
           <span className="animate-pulse">●</span>
           <span>{(finding.confidence * 100).toFixed(0)}% CONFIDENCE</span>
         </div>
-        <button className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-white group-hover:text-brand-primary transition-colors">
-          VIEW EVIDENCE
-          <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+        <button className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-white group-hover:text-brand-primary transition-colors">
+          EVIDENCE
+          <ChevronRight className="w-2.5 h-2.5 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
     </motion.div>

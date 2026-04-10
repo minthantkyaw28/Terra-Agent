@@ -64,27 +64,27 @@ export default function App() {
   return (
     <div className="flex h-screen bg-gray-950 text-gray-100 overflow-hidden font-sans selection:bg-brand-primary/30">
       {/* Left Sidebar: Swarm Status */}
-      <aside className="w-80 border-r border-white/5 flex flex-col bg-gray-950/50 backdrop-blur-xl z-20">
-        <div className="p-6 border-b border-white/5 bg-gradient-to-b from-brand-primary/5 to-transparent">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center shadow-[0_0_15px_rgba(0,242,255,0.2)]">
-              <Shield className="w-6 h-6 text-brand-primary" />
+      <aside className="w-60 border-r border-white/5 flex flex-col bg-gray-950/50 backdrop-blur-xl z-20">
+        <div className="p-4 border-b border-white/5 bg-gradient-to-b from-brand-primary/5 to-transparent">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center shadow-[0_0_15px_rgba(0,242,255,0.2)]">
+              <Shield className="w-4 h-4 text-brand-primary" />
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tighter text-white uppercase leading-none">TerraSentinel</h1>
-              <div className="flex items-center gap-1.5 mt-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Swarm OS v2.4</span>
+              <h1 className="text-sm font-black tracking-tighter text-white uppercase leading-none">TerraSentinel</h1>
+              <div className="flex items-center gap-1 mt-0.5">
+                <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Swarm OS v2.4</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <button 
               onClick={handleLaunch}
               disabled={isSimulating}
               className={cn(
-                "w-full py-3 rounded-xl font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2 transition-all duration-500",
+                "w-full py-2 rounded-lg font-black uppercase tracking-[0.2em] text-[9px] flex items-center justify-center gap-2 transition-all duration-500",
                 isSimulating 
                   ? "bg-red-500/20 text-red-500 border border-red-500/30 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.2)]" 
                   : "bg-brand-primary text-gray-950 hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(0,242,255,0.3)]"
@@ -130,36 +130,36 @@ export default function App() {
       {/* Main Content: Map & Detail */}
       <main className="flex-1 relative flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="h-16 border-b border-white/5 bg-gray-950/50 backdrop-blur-md flex items-center justify-between px-6 z-10">
-          <div className="flex items-center gap-6">
+        <header className="h-12 border-b border-white/5 bg-gray-950/50 backdrop-blur-md flex items-center justify-between px-4 z-10">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-gray-500" />
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                {missionSummary || (isSimulating ? "Mission: Global Scan in progress..." : "System Ready: Awaiting Mission")}
+              <Globe className="w-3.5 h-3.5 text-gray-500" />
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                {missionSummary || (isSimulating ? "Mission: Global Scan..." : "System Ready")}
               </span>
             </div>
             {isSimulating && (
-              <div className="flex items-center gap-4">
-                <div className="h-4 w-px bg-white/10" />
+              <div className="flex items-center gap-3">
+                <div className="h-3 w-px bg-white/10" />
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-brand-primary animate-pulse" />
-                  <span className="text-[10px] font-mono text-brand-primary uppercase">Processing Data Streams...</span>
+                  <Activity className="w-3.5 h-3.5 text-brand-primary animate-pulse" />
+                  <span className="text-[9px] font-mono text-brand-primary uppercase">Active Streams</span>
                 </div>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex -space-x-2">
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-1.5">
               {[1, 2, 3].map(i => (
-                <div key={i} className="w-6 h-6 rounded-full border-2 border-gray-950 bg-gray-800 flex items-center justify-center text-[8px] font-bold text-gray-400">
+                <div key={i} className="w-5 h-5 rounded-full border border-gray-950 bg-gray-800 flex items-center justify-center text-[7px] font-bold text-gray-400">
                   S{i}
                 </div>
               ))}
             </div>
-            <div className="h-8 w-px bg-white/10" />
+            <div className="h-6 w-px bg-white/10" />
             <div className="text-right">
-              <div className="text-[10px] font-black text-white uppercase tracking-tighter">WanderHobby</div>
-              <div className="text-[8px] font-bold text-brand-primary uppercase tracking-widest">Admin Access</div>
+              <div className="text-[9px] font-black text-white uppercase tracking-tighter">WanderHobby</div>
+              <div className="text-[7px] font-bold text-brand-primary uppercase tracking-widest">Admin</div>
             </div>
           </div>
         </header>
@@ -183,16 +183,16 @@ export default function App() {
       </main>
 
       {/* Right Sidebar: Intelligence Feed */}
-      <aside className="w-96 border-l border-white/5 bg-gray-950/50 backdrop-blur-xl flex flex-col z-20">
-        <div className="p-6 border-b border-white/5">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-sm font-black text-white uppercase tracking-widest">Intelligence Feed</h2>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-brand-primary/10 rounded border border-brand-primary/20">
+      <aside className="w-64 border-l border-white/5 bg-gray-950/50 backdrop-blur-xl flex flex-col z-20">
+        <div className="p-4 border-b border-white/5">
+          <div className="flex items-center justify-between mb-0.5">
+            <h2 className="text-[11px] font-black text-white uppercase tracking-widest">Intelligence Feed</h2>
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-brand-primary/10 rounded border border-brand-primary/20">
               <span className="w-1 h-1 rounded-full bg-brand-primary animate-ping" />
-              <span className="text-[9px] font-bold text-brand-primary uppercase">Live</span>
+              <span className="text-[8px] font-bold text-brand-primary uppercase">Live</span>
             </div>
           </div>
-          <p className="text-[10px] text-gray-500 font-medium">Confirmed illegal mining operations detected by swarm.</p>
+          <p className="text-[8px] text-gray-500 font-medium">Confirmed illegal mining operations.</p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
