@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Calendar, Cloud, Maximize2, RefreshCw, Loader2, Satellite, MapPin, Activity, ShieldAlert } from 'lucide-react';
+import { Calendar, Cloud, Maximize2, RefreshCw, Loader2, Satellite, MapPin, Activity, ShieldAlert, Eye, Layers } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { fetchBestScene, SceneResult, BBox } from '../lib/sentinelImagery';
+import { fetchBestScene, SceneResult, BBox, TARGETS, TargetConfig } from '../lib/sentinelImagery';
 
 // Fix Leaflet default icon path issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -14,55 +14,46 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const TARGETS: Record<string, { bbox: BBox; center: { lat: number; lon: number }; fallback: SceneResult }> = {
-  amazon: {
-    bbox: [-64.2, 3.2, -63.4, 3.8],
-    center: { lat: 3.5, lon: -63.8 },
-    fallback: {
-      itemId: 'S2B_20NMJ_20260301_0_L2A',
-      date: '2026-03-01',
-      cloudCover: 19.5,
-      thumbnailUrl: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/20/N/MJ/2026/3/S2B_20NMJ_20260301_0_L2A/preview.jpg',
-      cogUrl: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/20/N/MJ/2026/3/S2B_20NMJ_20260301_0_L2A/TCI.tif',
-      tileUrl: '',
-      bounds: [-64.2, 3.2, -63.4, 3.8],
-      minZoom: 8,
-      maxZoom: 14,
-      center: [-63.8, 3.5, 11]
-    }
-  },
-  congo: {
-    bbox: [27.0, 1.7, 27.8, 2.5],
-    center: { lat: 2.1, lon: 27.4 },
-    fallback: {
-      itemId: 'S2C_35NMB_20260124_0_L2A',
-      date: '2026-01-24',
-      cloudCover: 0.5,
-      thumbnailUrl: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/N/MB/2026/1/S2C_35NMB_20260124_0_L2A/preview.jpg',
-      cogUrl: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/35/N/MB/2026/1/S2C_35NMB_20260124_0_L2A/TCI.tif',
-      tileUrl: '',
-      bounds: [27.0, 1.7, 27.8, 2.5],
-      minZoom: 8,
-      maxZoom: 14,
-      center: [27.4, 2.1, 11]
-    }
-  },
-  borneo: {
-    bbox: [110.9, -0.8, 111.5, -0.2],
-    center: { lat: -0.5, lon: 111.2 },
-    fallback: {
-      itemId: 'S2C_49MEV_20250927_0_L2A',
-      date: '2025-09-27',
-      cloudCover: 16.7,
-      thumbnailUrl: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/49/M/EV/2025/9/S2C_49MEV_20250927_0_L2A/preview.jpg',
-      cogUrl: 'https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/49/M/EV/2025/9/S2C_49MEV_20250927_0_L2A/TCI.tif',
-      tileUrl: '',
-      bounds: [110.9, -0.8, 111.5, -0.2],
-      minZoom: 8,
-      maxZoom: 14,
-      center: [111.2, -0.5, 11]
-    }
-  }
+const TITILER = 'https://titiler.xyz';
+const SWIR_PARAMS = 'assets=swir16&assets=nir&assets=red&asset_as_band=true&rescale=0,3000';
+const TCI_PARAMS  = 'assets=visual&rescale=0,3000';
+
+const swirTileUrl = (itemUrl: string) =>
+  `${TITILER}/stac/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=${encodeURIComponent(itemUrl)}&${SWIR_PARAMS}`;
+
+const tciTileUrl = (itemUrl: string) =>
+  `${TITILER}/stac/tiles/WebMercatorQuad/{z}/{x}/{y}.png?url=${encodeURIComponent(itemUrl)}&${TCI_PARAMS}`;
+
+const FlyToMine = ({ lat, lon, zoom }: { lat: number; lon: number; zoom: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([lat, lon], zoom, { duration: 1.5 });
+  }, [lat, lon, zoom, map]);
+  return null;
+};
+
+const ZoomPresets = ({ target }: { target: TargetConfig }) => {
+  const map = useMap();
+  return (
+    <div className="absolute top-2 right-11 z-[1000] flex flex-col gap-1">
+      {[
+        { label: 'REGION',  zoom: 10 },
+        { label: 'SITE',    zoom: 12 },
+        { label: 'PIT',     zoom: 14 },
+      ].map(({ label, zoom }) => (
+        <button 
+          key={zoom} 
+          onClick={() => map.flyTo([target.focusLat, target.focusLon], zoom, { duration: 0.8 })}
+          className={cn(
+            "bg-[#0d1117] border border-[#1e2736] text-[9px] font-medium px-2 py-1 rounded cursor-pointer tracking-widest font-mono transition-colors",
+            zoom === 14 ? "text-red-500 hover:bg-red-500/10" : "text-gray-400 hover:text-white hover:bg-white/5"
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 };
 
 const MapController = ({ bounds, center, resetTrigger }: { bounds: BBox, center: [number, number, number], resetTrigger: number }) => {
@@ -102,13 +93,12 @@ const ZoomIndicator = () => {
 };
 
 interface SentinelViewerProps {
-  region: string; // Will map to 'amazon' | 'congo' | 'borneo'
+  region: string;
   onSceneLoaded?: (scene: SceneResult) => void;
 }
 
 export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneLoaded }) => {
-  // Normalize region name
-  const normalizedRegion = region.toLowerCase().includes('amazon') || region.toLowerCase().includes('yanomami') ? 'amazon' :
+  const normalizedRegion = region.toLowerCase().includes('amazon') || region.toLowerCase().includes('yanomami') || region.toLowerCase().includes('peru') ? 'amazon' :
                            region.toLowerCase().includes('congo') || region.toLowerCase().includes('orientale') ? 'congo' :
                            region.toLowerCase().includes('borneo') || region.toLowerCase().includes('kalimantan') ? 'borneo' : 'amazon';
 
@@ -116,12 +106,13 @@ export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneL
   const [scene, setScene] = useState<SceneResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [resetTrigger, setResetTrigger] = useState(0);
+  const [layer, setLayer] = useState<'swir' | 'tci'>('swir');
 
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
       setLoading(true);
-      const result = await fetchBestScene(target.bbox, target.fallback);
+      const result = await fetchBestScene(target.bounds, target);
       if (isMounted) {
         setScene(result);
         setLoading(false);
@@ -130,27 +121,60 @@ export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneL
     };
     load();
     return () => { isMounted = false; };
-  }, [normalizedRegion, target.bbox, target.fallback, onSceneLoaded]);
+  }, [normalizedRegion, target, onSceneLoaded]);
 
   const handleReset = () => setResetTrigger(prev => prev + 1);
 
+  const activeTileUrl = scene ? (layer === 'swir' ? swirTileUrl(scene.itemUrl) : tciTileUrl(scene.itemUrl)) : '';
+
   return (
     <div className="w-full rounded-xl border border-[#1e2736] overflow-hidden bg-[#0a0e14] flex flex-col shadow-2xl">
+      {/* Layer Toggle Header */}
+      <div className="bg-[#0d1117] border-b border-[#1e2736] p-2 px-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-brand-primary" />
+          <span className="text-[10px] font-black text-white uppercase tracking-widest">Imaging Mode</span>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setLayer('swir')}
+            className={cn(
+              "text-[9px] font-black px-3 py-1 rounded border transition-all uppercase tracking-widest",
+              layer === 'swir' 
+                ? "bg-red-500 text-white border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]" 
+                : "bg-transparent text-gray-500 border-[#1e2736] hover:text-gray-300"
+            )}
+          >
+            Mining Detection
+          </button>
+          <button
+            onClick={() => setLayer('tci')}
+            className={cn(
+              "text-[9px] font-black px-3 py-1 rounded border transition-all uppercase tracking-widest",
+              layer === 'tci' 
+                ? "bg-red-500 text-white border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]" 
+                : "bg-transparent text-gray-500 border-[#1e2736] hover:text-gray-300"
+            )}
+          >
+            True Colour
+          </button>
+        </div>
+      </div>
+
       {/* Map Area */}
       <div className="relative h-[420px] w-full overflow-hidden group">
-        {/* Scanning Animation (Overlay) */}
+        {/* Scanning Animation */}
         {loading && (
           <div className="absolute inset-0 z-20 pointer-events-none">
             <div className="absolute top-0 left-0 w-full h-[2px] bg-[#22c55e] opacity-60 shadow-[0_0_15px_#22c55e] animate-[scan_2s_linear_infinite]" />
           </div>
         )}
 
-        {/* Crosshair Overlay */}
+        {/* Crosshair */}
         <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
           <div className="relative w-10 h-10">
             <div className="absolute top-1/2 left-0 w-full h-[1px] bg-red-500/60" />
             <div className="absolute left-1/2 top-0 w-[1px] h-full bg-red-500/60" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-500/40 animate-ping" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-red-500" />
           </div>
         </div>
@@ -159,7 +183,9 @@ export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneL
         <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2">
           <div className="bg-gray-950/90 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full flex items-center gap-2 shadow-xl">
             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">Sentinel-2 · LIVE · 10m</span>
+            <span className="text-[10px] font-black text-white uppercase tracking-widest">
+              {layer === 'swir' ? 'SWIR SENSOR' : 'VISUAL SENSOR'} · 10m
+            </span>
           </div>
         </div>
 
@@ -171,45 +197,57 @@ export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneL
           <button 
             onClick={handleReset}
             className="p-2 bg-gray-950/90 backdrop-blur-md border border-white/10 rounded-lg text-gray-400 hover:text-white transition-colors shadow-xl"
-            title="Reset View"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Map or Thumbnail */}
+        {/* Map Container */}
         <div className={cn(
           "absolute inset-0 transition-opacity duration-700",
-          (scene && scene.tileUrl) ? "opacity-100" : "opacity-0 pointer-events-none"
+          (scene && activeTileUrl) ? "opacity-100" : "opacity-0 pointer-events-none"
         )}>
-          {scene && scene.tileUrl && (
+          {scene && activeTileUrl && (
             <MapContainer
-              center={[scene.center[1], scene.center[0]]}
-              zoom={scene.center[2]}
+              center={[target.focusLat, target.focusLon]}
+              zoom={target.defaultZoom}
               zoomControl={false}
               className="h-full w-full"
-              minZoom={scene.minZoom}
-              maxZoom={scene.maxZoom}
+              minZoom={8}
+              maxZoom={18}
+              scrollWheelZoom={true}
             >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                attribution='&copy; OpenStreetMap &copy; CARTO'
               />
               <TileLayer
-                url={scene.tileUrl}
+                key={`${scene.itemId}-${layer}`}
+                url={activeTileUrl}
+                minZoom={8}
+                maxNativeZoom={14}
+                maxZoom={18}
+                tileSize={256}
+                attribution="Sentinel-2 L2A · ESA · Element84 · TiTiler"
                 opacity={1.0}
               />
               <ZoomControl position="bottomright" />
               <ZoomIndicator />
+              <FlyToMine
+                lat={target.focusLat}
+                lon={target.focusLon}
+                zoom={target.defaultZoom}
+              />
+              <ZoomPresets target={target} />
               <MapController bounds={scene.bounds} center={[scene.center[0], scene.center[1], scene.center[2]]} resetTrigger={resetTrigger} />
             </MapContainer>
           )}
         </div>
 
-        {/* Thumbnail Fallback / Loading State */}
+        {/* Fallback/Loading */}
         <div className={cn(
           "absolute inset-0 bg-[#0a0e14] flex items-center justify-center transition-opacity duration-700",
-          (!scene || !scene.tileUrl) ? "opacity-100" : "opacity-0 pointer-events-none"
+          (!scene || !activeTileUrl) ? "opacity-100" : "opacity-0 pointer-events-none"
         )}>
           {scene ? (
             <div className="relative w-full h-full">
@@ -220,15 +258,6 @@ export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneL
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                {!scene.tileUrl && !loading && (
-                  <div className="bg-amber-500/20 border border-amber-500/30 px-4 py-2 rounded-xl backdrop-blur-md flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-2 text-amber-500">
-                      <Maximize2 className="w-4 h-4" />
-                      <span className="text-xs font-black uppercase tracking-widest">Preview Mode</span>
-                    </div>
-                    <span className="text-[10px] text-amber-500/70 font-medium uppercase">High-res tiles unavailable</span>
-                  </div>
-                )}
                 {loading && (
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
@@ -251,22 +280,21 @@ export const SentinelViewer: React.FC<SentinelViewerProps> = ({ region, onSceneL
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <Satellite className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter">Sentinel-2 L2A</span>
+            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter">
+              {layer === 'swir' ? 'SWIR FALSE COLOUR · B11/B08/B04' : 'TRUE COLOUR · RGB'}
+            </span>
           </div>
           <div className="h-3 w-px bg-white/5" />
           <div className="flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-[11px] font-mono text-gray-400">{scene?.date || '----/--/--'}</span>
-          </div>
-          <div className="h-3 w-px bg-white/5" />
-          <div className="flex items-center gap-2">
-            <Cloud className={cn("w-3.5 h-3.5", (scene?.cloudCover || 0) > 20 ? "text-amber-500" : "text-gray-500")} />
-            <span className="text-[11px] font-mono text-gray-400">{scene?.cloudCover.toFixed(1) || '0.0'}% Cloud</span>
+            <Eye className="w-3.5 h-3.5 text-brand-primary" />
+            <span className="text-[11px] font-black text-brand-primary uppercase tracking-widest">
+              {layer === 'swir' ? 'MINING DETECTION MODE' : 'NATURAL COLOUR'}
+            </span>
           </div>
           <div className="h-3 w-px bg-white/5 hidden md:block" />
           <div className="hidden md:flex items-center gap-2">
-            <Maximize2 className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter">10m GSD</span>
+            <Cloud className={cn("w-3.5 h-3.5", (scene?.cloudCover || 0) > 20 ? "text-amber-500" : "text-gray-500")} />
+            <span className="text-[11px] font-mono text-gray-400">{scene?.cloudCover.toFixed(1) || '0.0'}% Cloud</span>
           </div>
         </div>
         
