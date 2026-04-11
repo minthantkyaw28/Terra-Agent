@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ShieldAlert, MapPin, Activity, Droplets, Maximize2, CheckCircle2, AlertTriangle, Info, X, Zap } from 'lucide-react';
+import { ArrowLeft, ShieldAlert, MapPin, Activity, Droplets, Maximize2, CheckCircle2, AlertTriangle, Info, X, Zap, Calendar, Satellite, Cloud } from 'lucide-react';
 import { SimFinding } from '../lib/demoSimulation';
 import { cn } from '../lib/utils';
+import { SentinelViewer } from './SentinelViewer';
+import { SceneResult } from '../lib/sentinelImagery';
 
 interface EvidenceDetailProps {
   finding: SimFinding;
@@ -10,6 +12,8 @@ interface EvidenceDetailProps {
 }
 
 export const EvidenceDetail: React.FC<EvidenceDetailProps> = ({ finding, onBack }) => {
+  const [liveScene, setLiveScene] = useState<SceneResult | null>(null);
+
   const getSeverityColor = (severity: number) => {
     if (severity >= 10) return 'text-red-500';
     if (severity >= 7) return 'text-orange-500';
@@ -61,45 +65,26 @@ export const EvidenceDetail: React.FC<EvidenceDetailProps> = ({ finding, onBack 
       </div>
 
       <div className="flex-1 p-4 md:p-8 space-y-8 max-w-screen-2xl mx-auto w-full">
-        {/* Section 1: High-Def Evidence Grid - THE BIG PICTURE GRID */}
+        {/* Section 1: Live Satellite Viewer */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-[11px] font-black text-gray-500 uppercase tracking-[0.4em]">High-Definition Evidence Swarm Imagery</h2>
-            <div className="text-[10px] font-mono text-brand-primary/60 uppercase">Sentinel-2 / Planet / SAR Fusion</div>
+            <h2 className="text-[11px] font-black text-gray-500 uppercase tracking-[0.4em]">Live Swarm Intelligence Imagery</h2>
+            <div className="text-[10px] font-mono text-brand-primary/60 uppercase">Sentinel-2 L2A · Real-time COG Stream</div>
+          </div>
+          
+          <SentinelViewer 
+            region={finding.region} 
+            onSceneLoaded={setLiveScene}
+          />
+        </section>
+
+        {/* Section 2: High-Def Evidence Grid - THE BIG PICTURE GRID */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[11px] font-black text-gray-500 uppercase tracking-[0.4em]">Ground Truth & Historical Context</h2>
+            <div className="text-[10px] font-mono text-brand-primary/60 uppercase">Reference Imagery Archive</div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Hero Image (Large) */}
-            <div className="relative rounded-3xl overflow-hidden border border-white/10 aspect-video group shadow-2xl bg-gray-900">
-              <img 
-                src={imageDetails.hero} 
-                alt="Satellite Evidence Hero" 
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-              
-              {/* SVG Overlay for Polygon */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <motion.polygon 
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
-                  points="35,35 65,30 70,65 40,75" 
-                  className="fill-red-500/10 stroke-red-500 stroke-[0.4]"
-                />
-              </svg>
-
-              <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-                <div className="glass-panel px-4 py-2 rounded-xl border-white/10 text-[11px] font-mono text-white/90">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Activity className="w-4 h-4 text-brand-primary" />
-                    <span className="font-black">PRIMARY TARGET ZONE</span>
-                  </div>
-                  <div className="text-gray-400 uppercase">CREDIT: {imageDetails.credit}</div>
-                </div>
-              </div>
-            </div>
-
             {/* Overview Image (Large) */}
             <div className="relative rounded-3xl overflow-hidden border border-white/10 aspect-video group shadow-2xl bg-gray-900">
               <img 
@@ -183,7 +168,7 @@ export const EvidenceDetail: React.FC<EvidenceDetailProps> = ({ finding, onBack 
           </div>
         </section>
 
-        {/* Section 3: GIS Metrics Grid */}
+        {/* Section 4: GIS Metrics Grid */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-[11px] font-black text-gray-500 uppercase tracking-[0.4em]">Geospatial Intelligence Metrics</h2>
@@ -191,19 +176,19 @@ export const EvidenceDetail: React.FC<EvidenceDetailProps> = ({ finding, onBack 
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { label: 'NDVI Delta', value: finding.ndviDelta.toFixed(2), icon: Activity, color: 'text-red-400' },
-              { label: 'Disturbance', value: `${finding.disturbanceKm2} km²`, icon: Maximize2, color: 'text-orange-400' },
-              { label: 'Features', value: finding.features.length, icon: ShieldAlert, color: 'text-brand-primary' },
+              { label: 'Scene Date', value: liveScene?.date || 'Searching...', icon: Calendar, color: 'text-brand-primary' },
+              { label: 'Cloud Cover', value: liveScene ? `${liveScene.cloudCover.toFixed(1)}%` : '...', icon: Cloud, color: (liveScene?.cloudCover || 0) > 20 ? 'text-amber-500' : 'text-green-400' },
+              { label: 'Data Source', value: 'Sentinel-2 L2A', icon: Satellite, color: 'text-brand-primary' },
+              { label: 'Resolution', value: '10m GSD', icon: Maximize2, color: 'text-gray-400' },
               { label: 'Mercury', value: finding.gisFindings.mercury_risk ? 'HIGH' : 'LOW', icon: Droplets, color: finding.gisFindings.mercury_risk ? 'text-red-500' : 'text-green-500' },
-              { label: 'Velocity', value: finding.spreadVelocity.toUpperCase(), icon: Activity, color: 'text-amber-400' },
-              { label: 'Source', value: 'S-2 / L-8', icon: Info, color: 'text-gray-400' },
+              { label: 'Scene ID', value: liveScene?.itemId.substring(0, 12) + '...' || '...', icon: Info, color: 'text-gray-500' },
             ].map((metric, i) => (
               <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-brand-primary/30 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <metric.icon className={cn("w-4 h-4", metric.color)} />
                   <span className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">{metric.label}</span>
                 </div>
-                <div className="text-xl font-black text-white group-hover:text-brand-primary transition-colors">{metric.value}</div>
+                <div className="text-sm font-black text-white group-hover:text-brand-primary transition-colors truncate">{metric.value}</div>
               </div>
             ))}
           </div>
